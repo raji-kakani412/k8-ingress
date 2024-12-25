@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Deployment
+metadata:
+  name: app2
+  labels: # these are replicaset labels
+    name: app2
+    tier: frontend
+spec:
+  replicas: 1 # we can give how many replicas we need 
+  selector: # these are used to select the pod to create replicas
+    matchLabels:
+      name: app2
+      tier: frontend
+  template: # this is pod definition
+    metadata:
+      labels:
+        name: app2
+        tier: frontend         
+    spec:
+      containers:
+      - name: app2
+        image: rajikakani412/app2:v1
+
+---
+apiVersion: v1
+kind: Service # this creates ClusterIP service
+metadata:
+  name: app2
+spec:
+  selector:
+   name: app2
+   tier: frontend
+  ports:
+  - name: app2-svc-port
+    protocol: tcp
+    port: 80 # this is service port
+    targetport: 80 # this is container port. we can also give name and provide value in pod definition
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+    name: app2
+    annotations:
+        alb.ingress.kubernetes.io/ingress.class: alb
+        alb.ingress.kubernetes.io/scheme: internet-facing
+        alb.ingress.kubernetes.io/target-type: ip
+        alb.ingress.kubernetes.io/certificate-arn: # create one acm and provide here
+        alb.ingress.kubernetes.io/tags: Environment=dev,Team=test
+        alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]' 
+        alb.ingress.kubernetes.io/group.name: expense
+        
+spec:
+    rules:
+    -  host: "app2.devops-aws.tech"
+       http:
+        paths:
+        - pathType: Prefix
+          path: "/"
+          backend:
+            service:
+              name: app2
+              port:
+                number: 80
+
