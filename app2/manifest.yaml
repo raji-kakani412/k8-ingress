@@ -42,7 +42,7 @@ kind: Ingress
 metadata:
     name: app2
     annotations:
-        alb.ingress.kubernetes.io/ingress.class: alb
+        #alb.ingress.kubernetes.io/ingress.class: alb
         alb.ingress.kubernetes.io/scheme: internet-facing
         alb.ingress.kubernetes.io/target-type: ip
         alb.ingress.kubernetes.io/certificate-arn: # create one acm and provide here
@@ -51,15 +51,16 @@ metadata:
         alb.ingress.kubernetes.io/group.name: expense
         
 spec:
-    rules:
-    -  host: "app2.devops-aws.tech"
-       http:
-        paths:
-        - pathType: Prefix
-          path: "/"
-          backend:
-            service:
-              name: app2
-              port:
-                number: 80
+  ingressClassName: alb
+  rules:
+  -  host: "app2.devops-aws.tech"
+     http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: app2
+            port:
+              number: 80
 
